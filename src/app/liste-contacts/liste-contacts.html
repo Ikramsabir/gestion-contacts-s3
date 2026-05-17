@@ -1,0 +1,110 @@
+<!-- liste-contacts.component.html -->
+
+<div>
+  <h2>Contacts ({{ contacts.length }})</h2>
+
+  <!-- Boutons filtre - Correction: filtreActif machi filltreActif -->
+  <button (click)="filtreActif = null">Tous ({{ contacts.length }})</button>
+  <button (click)="filtreActif = true">Actifs</button>
+  <button (click)="filtreActif = false">Inactifs</button>
+
+  <!-- @if : message si liste vide - Correction: contactsFiltres machi contactsFilters -->
+  @if (contactsFiltres.length === 0) {
+    <p>Aucun contact dans cette catégorie.</p>
+  }
+
+  <!-- @if / @else if / @else -->
+  @if (contacts.length > 10) {
+    <p>📈 Carnet bien rempli !</p>
+  } @else if (contacts.length > 0) {
+    <p>📈 {{ contacts.length }} contact(s) enregistré(s)</p>
+  } @else {
+    <p>📈 Le carnet est vide.</p>
+  }
+
+  <!-- @for avec variables spéciales + PIPES EXERCICE 4 -->
+  <ul>
+    @for (c of contactsFiltres; track c.email; let i = $index; let first = $first; let last = $last) {
+      <li appSurvol>
+        <span>{{ i + 1 }}</span>
+        <!-- uppercase : nom en majuscules -->
+        <strong>{{ c.nom | uppercase }}</strong>
+        <!-- slice : afficher seulement les 20 premiers caractères de l'email -->
+        <em>{{ c.email | slice:0:20 }}</em>
+
+        @if (c.actif) {
+          <span>🟢 Actif</span>
+        } @else {
+          <span>🔴 Inactif</span>
+        }
+
+        <!-- Score avec number : toujours 1 décimale -->
+        <br>
+        <span>Score : {{ c.score | number:'1.1-1' }}/20</span>
+        
+        <!-- Taux de réussite en pourcentage -->
+        <span> | Taux : {{ c.score / 20 | percent:'1.0-0' }}</span>
+
+        <!-- Chaînage de pipes -->
+        <br>
+        <span>Première lettre : {{ c.nom | uppercase | slice:0:1 }}</span>
+
+        <!-- Pipe personnalisé initiales -->
+        <span> | Initiales : {{ c.nom | initiales }}</span>
+
+        <!-- Pipe personnalisé mention -->
+        <br>
+        <span>Mention : {{ c.score | mention }}</span>
+
+        @if (first) {
+          <small> (Premier)</small>
+        }
+        @if (last) {
+          <small> (Dernier)</small>
+        }
+
+        @switch (c.role) {
+          @case ('admin') {
+            <span> 👑 Admin</span>
+          }
+          @case ('user') {
+            <span> 👤 Utilisateur</span>
+          }
+          @case ('guest') {
+            <span> 👋 Visiteur</span>
+          }
+          @default {
+            <span> ❓ Rôle inconnu</span>
+          }
+        }
+
+        <!-- Survol avec couleur personnalisée selon le rôle -->
+        <br>
+        <small [appSurvol]="c.role === 'admin' ? '#FFE0E0' : '#E0F0FF'">
+          ({{ c.role }})
+        </small>
+
+        <!-- Directive @HostBinding - Correction: isActive machi sActive -->
+        <div appHighlight [isActive]="c.actif">
+          Élément actif qui réagit au survol
+        </div>
+      </li>
+    }
+    @empty {
+      <li>Aucun résultat pour ce filtre.</li>
+    }
+  </ul>
+
+  <!-- Bonus : @for avec $even/$odd pour lignes alternées -->
+  <h3>Tableau des scores</h3>
+  <table>
+    @for (c of contacts; track c.email; let pair = $even) {
+      <tr [style.backgroundColor]="pair ? '#F5F5F5' : '#FFFFFF'">
+        <td>{{ c.nom }}</td>
+        <td [ngClass]="'score-' + (c.score >= 16 ? 'excellent' : (c.score >= 10 ? 'passable' : 'echec'))">
+          {{ c.score }}/20
+        </td>
+      </tr>
+    }
+  </table>
+</div>
